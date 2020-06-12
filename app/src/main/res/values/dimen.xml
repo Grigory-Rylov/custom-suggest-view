@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="bubblePadding">4dp</dimen>
+    <dimen name="bubbleHorizontalMargin">8dp</dimen>
+    <dimen name="bubbleRadius">8dp</dimen>
+    <dimen name="bubbleTextSize">20sp</dimen>
+</resources>
