@@ -11,6 +11,7 @@ import android.widget.Scroller
 import android.widget.Toast
 import kotlin.math.min
 
+private const val SPEED_FACTOR = 2f
 private const val MAX_SUGGEST_COUNT = 10
 
 /**
@@ -37,6 +38,7 @@ class SuggestView @JvmOverloads constructor(
         }
         isHorizontalScrollBarEnabled = true
         isVerticalScrollBarEnabled = false
+        scroller.setFriction(0.115f)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -219,7 +221,7 @@ class SuggestView @JvmOverloads constructor(
 
             scroller.fling(
                 scrollX, scrollY,
-                (-velocityX).toInt(), (-velocityY).toInt(),
+                (-velocityX * SPEED_FACTOR).toInt(), 0,
                 0, contentWidth - width,
                 0, 0
             )
