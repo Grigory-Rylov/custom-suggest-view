@@ -65,7 +65,7 @@ class SuggestView @JvmOverloads constructor(
         invalidate()
     }
 
-    fun setSuggests(suggests: List<String>) {
+    fun setSuggests(suggests: List<CharSequence>) {
         bubblesCount = min(suggests.size, MAX_SUGGEST_COUNT)
 
         for (i in 0 until bubblesCount) {

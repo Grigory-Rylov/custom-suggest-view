@@ -22,7 +22,7 @@ class SuggestBubbleDrawable(
 ) : Drawable() {
     private val bgColor = ContextCompat.getColor(context, R.color.suggestBubble)
     private val textColor = ContextCompat.getColor(context, R.color.suggestBubbleText)
-    var currentText = ""
+    var currentText: CharSequence = ""
         private set
     private var targetSize = RectF()
     private var currentSize = RectF()
@@ -61,10 +61,10 @@ class SuggestBubbleDrawable(
     /**
      * Set target text.
      */
-    fun setText(text: String) {
+    fun setText(text: CharSequence) {
         currentText = text
         textPaint.getTextBounds(currentText, 0, currentText.length, textBounds)
-        targetTextWidth = textPaint.measureText(currentText).toInt()
+        targetTextWidth = textPaint.measureText(currentText.toString()).toInt()
         targetSize.set(
             0f, 0f, (leftPadding + rightPadding + targetTextWidth),
             (topPadding + bottomPadding + textSize)
@@ -81,7 +81,6 @@ class SuggestBubbleDrawable(
         animator = ValueAnimator.ofInt(bounds.width(), targetSize.width().toInt())
         animator.addUpdateListener(animatorUpdateListener)
         // TODO: change animation duration
-        animator.duration = 1000
         animator.start()
     }
 
