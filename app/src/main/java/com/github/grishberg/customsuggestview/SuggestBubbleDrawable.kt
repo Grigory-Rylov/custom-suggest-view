@@ -22,7 +22,8 @@ class SuggestBubbleDrawable(
 ) : Drawable() {
     private val bgColor = ContextCompat.getColor(context, R.color.suggestBubble)
     private val textColor = ContextCompat.getColor(context, R.color.suggestBubbleText)
-    private var currentText = ""
+    var currentText = ""
+        private set
     private var targetSize = RectF()
     private var currentSize = RectF()
     private val textBounds = Rect()
@@ -36,18 +37,25 @@ class SuggestBubbleDrawable(
     private val animatorUpdateListener = UpdateListener()
     private var lastVisibleCharCound = 0
     private val drawCharBuffer = CharArray(1)
+    private val clickBounds = Rect()
 
     private var animator: ValueAnimator = ValueAnimator.ofInt(0, 1)
     var updateSizeAction: OnSizeChangedAction? = null
     var leftOffset: Int = 0
+    val height: Int
 
+    private val textSize = context.resources.getDimension(R.dimen.bubbleTextSize)
     private val borderPaint = Paint().apply {
         color = bgColor
     }
     private var textPaint = Paint().apply {
         color = textColor
-        textSize = context.resources.getDimension(R.dimen.bubbleTextSize)
         isAntiAlias = true
+    }
+
+    init {
+        textPaint.textSize = textSize
+        height = (topPadding + bottomPadding + textSize).toInt()
     }
 
     /**
@@ -59,7 +67,7 @@ class SuggestBubbleDrawable(
         targetTextWidth = textPaint.measureText(currentText).toInt()
         targetSize.set(
             0f, 0f, (leftPadding + rightPadding + targetTextWidth),
-            (topPadding + bottomPadding + textBounds.height())
+            (topPadding + bottomPadding + textSize)
         )
         textTop = targetSize.height() / 2 - (textPaint.descent() + textPaint.ascent()) / 2
     }
@@ -72,6 +80,7 @@ class SuggestBubbleDrawable(
         currentSize.bottom = targetSize.bottom
         animator = ValueAnimator.ofInt(bounds.width(), targetSize.width().toInt())
         animator.addUpdateListener(animatorUpdateListener)
+        // TODO: change animation duration
         animator.duration = 1000
         animator.start()
     }
@@ -87,6 +96,12 @@ class SuggestBubbleDrawable(
             currentSize.right.toInt(),
             currentSize.bottom.toInt()
         )
+    }
+
+    fun isContains(x: Int, y: Int): Boolean {
+        clickBounds.set(bounds)
+        clickBounds.offset(leftOffset, 0)
+        return clickBounds.contains(x, y)
     }
 
     override fun draw(canvas: Canvas) {

@@ -13,6 +13,14 @@ class MainActivity : AppCompatActivity() {
         // to start animation from non empty suggest
         //suggestView.setInitialSuggests(mutableListOf("test strings 01234", "another strings 0923423", "yet another st 0934"))
 
-        suggestView.setSuggests(mutableListOf("test string", "another string", "yet another"))
+        suggestView.setSuggests(
+            mutableListOf(
+                "test string",
+                "another string",
+                "yet another",
+                "Aaaaaaa aaaa",
+                "Bbb b bbbb"
+            )
+        )
     }
 }
