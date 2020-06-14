@@ -7,13 +7,14 @@ import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import android.view.View
+import android.widget.OverScroller
 import android.widget.Toast
 import kotlin.math.min
 
 private const val MAX_SUGGEST_COUNT = 10
 
 /**
- * Main suggests view
+ * Main suggests view.
  */
 class SuggestView @JvmOverloads constructor(
     ctx: Context,
@@ -28,8 +29,7 @@ class SuggestView @JvmOverloads constructor(
         ctx.resources.getDimensionPixelOffset(R.dimen.bubbleVerticalMargin)
     private var bubblesCount = 0
     private val gestureDetector: GestureDetector = GestureDetector(context, MyGestureListener())
-    private val scroller =
-        FastScroller(context)
+    private val scroller = OverScroller(context)
 
     init {
         for (i in 0 until MAX_SUGGEST_COUNT) {
@@ -37,7 +37,20 @@ class SuggestView @JvmOverloads constructor(
         }
         isHorizontalScrollBarEnabled = true
         isVerticalScrollBarEnabled = false
-        // scroller.setFriction(0.015f)
+    }
+
+    fun setSuggests(suggests: List<CharSequence>) {
+        bubblesCount = min(suggests.size, MAX_SUGGEST_COUNT)
+
+        for (i in 0 until bubblesCount) {
+            val currentBubble = bubbles[i]
+            currentBubble.updateSizeAction = listener
+            currentBubble.setText(suggests[i])
+        }
+
+        for (i in 0 until bubblesCount) {
+            bubbles[i].startAnimation()
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -64,20 +77,6 @@ class SuggestView @JvmOverloads constructor(
             currentBubble.updateImmideately()
         }
         invalidate()
-    }
-
-    fun setSuggests(suggests: List<CharSequence>) {
-        bubblesCount = min(suggests.size, MAX_SUGGEST_COUNT)
-
-        for (i in 0 until bubblesCount) {
-            val currentBubble = bubbles[i]
-            currentBubble.updateSizeAction = listener
-            currentBubble.setText(suggests[i])
-        }
-
-        for (i in 0 until bubblesCount) {
-            bubbles[i].startAnimation()
-        }
     }
 
     /**
@@ -107,7 +106,7 @@ class SuggestView @JvmOverloads constructor(
                     newScrollX - scrollX,
                     0
                 )
-                awakenScrollBars(scroller.duration)
+                awakenScrollBars()
             }
         }
 
@@ -122,9 +121,7 @@ class SuggestView @JvmOverloads constructor(
         return totalContentWidth
     }
 
-    override fun computeVerticalScrollRange(): Int {
-        return 0
-    }
+    override fun computeVerticalScrollRange() = 0
 
     override fun computeScroll() {
         if (scroller.computeScrollOffset()) {
@@ -154,7 +151,24 @@ class SuggestView @JvmOverloads constructor(
                 bubbles[i].leftOffset = left
                 left += bubbles[i].bounds.width() + bubbleHorisontalMargin
             }
+
+            /**
+             * scroll to right if content right corner is not at the end
+             */
+            scrollToRightIfNeeded()
             invalidate()
+        }
+
+        private fun scrollToRightIfNeeded() {
+            val contentWidth = computeHorizontalScrollRange()
+            if (scrollX > 0) {
+                if (contentWidth < width) {
+                    scrollTo(0, 0)
+                } else if (contentWidth - scrollX < width) {
+                    val dx = contentWidth - width
+                    scrollTo(dx, 0)
+                }
+            }
         }
     }
 
@@ -180,16 +194,20 @@ class SuggestView @JvmOverloads constructor(
             distanceY: Float
         ): Boolean {
             val contentWidth = computeHorizontalScrollRange()
+            if (contentWidth < width) {
+                scrollTo(0, 0)
+                return true
+            }
             val totalOffsetOfterScrollX = scrollX + distanceX
             if (distanceX < 0) {
-                scrollLeft(totalOffsetOfterScrollX, distanceX)
+                scrollRight(totalOffsetOfterScrollX, distanceX)
             } else {
-                scrollRight(totalOffsetOfterScrollX, contentWidth, distanceX)
+                scrollLeft(totalOffsetOfterScrollX, contentWidth, distanceX)
             }
             return true
         }
 
-        private fun scrollRight(
+        private fun scrollLeft(
             totalOffsetOfterScrollX: Float,
             contentWidth: Int,
             distanceX: Float
@@ -201,7 +219,7 @@ class SuggestView @JvmOverloads constructor(
             }
         }
 
-        private fun scrollLeft(totalOffsetOfterScrollX: Float, distanceX: Float) {
+        private fun scrollRight(totalOffsetOfterScrollX: Float, distanceX: Float) {
             if (totalOffsetOfterScrollX < 0) {
                 scrollBy((distanceX - totalOffsetOfterScrollX).toInt(), 0)
             } else {
@@ -221,13 +239,14 @@ class SuggestView @JvmOverloads constructor(
                 return false
             }
 
+            val maxX = contentWidth - width
             scroller.fling(
                 scrollX, scrollY,
                 (-velocityX).toInt(), 0,
-                0, contentWidth - width,
+                0, maxX,
                 0, 0
             )
-            awakenScrollBars(scroller.duration)
+            awakenScrollBars()
             invalidate()
             return true
         }
