@@ -50,7 +50,12 @@ class MainActivity : AppCompatActivity() {
                 "another string",
                 "yet another",
                 "Aaaaaaa aaaa",
-                "Bbb b bbbb"
+                "Bbb b bbbb",
+                "Bbb 1 bbbb",
+                "Bbb 2 bbbb",
+                "Bbb 3 bbbb",
+                "Bbb 4 bbbb",
+                "Bbb 5 bbbb"
             )
         )
     }

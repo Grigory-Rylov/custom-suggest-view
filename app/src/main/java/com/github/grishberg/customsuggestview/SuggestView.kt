@@ -7,11 +7,9 @@ import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Scroller
 import android.widget.Toast
 import kotlin.math.min
 
-private const val SPEED_FACTOR = 2f
 private const val MAX_SUGGEST_COUNT = 10
 
 /**
@@ -30,7 +28,8 @@ class SuggestView @JvmOverloads constructor(
         ctx.resources.getDimensionPixelOffset(R.dimen.bubbleVerticalMargin)
     private var bubblesCount = 0
     private val gestureDetector: GestureDetector = GestureDetector(context, MyGestureListener())
-    private val scroller = Scroller(context)
+    private val scroller =
+        FastScroller(context)
 
     init {
         for (i in 0 until MAX_SUGGEST_COUNT) {
@@ -38,7 +37,7 @@ class SuggestView @JvmOverloads constructor(
         }
         isHorizontalScrollBarEnabled = true
         isVerticalScrollBarEnabled = false
-        scroller.setFriction(0.115f)
+        // scroller.setFriction(0.015f)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -171,6 +170,9 @@ class SuggestView @JvmOverloads constructor(
             return false
         }
 
+        /**
+         * Scroll manually.
+         */
         override fun onScroll(
             e1: MotionEvent,
             e2: MotionEvent,
@@ -221,11 +223,12 @@ class SuggestView @JvmOverloads constructor(
 
             scroller.fling(
                 scrollX, scrollY,
-                (-velocityX * SPEED_FACTOR).toInt(), 0,
+                (-velocityX).toInt(), 0,
                 0, contentWidth - width,
                 0, 0
             )
             awakenScrollBars(scroller.duration)
+            invalidate()
             return true
         }
     }
